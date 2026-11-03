@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
+import { ErrorBoundary } from './components/ErrorBoundary'
 import LandingPage from './pages/LandingPage'
 import TeacherLogin from './pages/TeacherLogin'
 import TeacherOnboarding from './pages/TeacherOnboarding'
@@ -59,11 +60,14 @@ function AppRoutes() {
 }
 
 export default function App() {
+  // basename must match vite.config.ts `base`
   return (
-    <BrowserRouter basename="/ekhtaberni">
-      <AuthProvider>
-        <AppRoutes />
-      </AuthProvider>
-    </BrowserRouter>
+    <ErrorBoundary>
+      <BrowserRouter basename="/ekhtaberni">
+        <AuthProvider>
+          <AppRoutes />
+        </AuthProvider>
+      </BrowserRouter>
+    </ErrorBoundary>
   )
 }

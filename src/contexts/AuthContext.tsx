@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react'
 import { Session, User } from '@supabase/supabase-js'
-import { supabase } from '../lib/supabase'
+import { supabase, isSupabaseConfigured } from '../lib/supabase'
 import { Teacher } from '../types'
 
 // Admin email - can be overridden with VITE_ADMIN_EMAIL (fallback kept for compatibility)
@@ -28,26 +28,54 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const isAdmin = user?.email === ADMIN_EMAIL
 
   const fetchTeacher = async (userId: string) => {
-    const { data } = await supabase
-      .from('teachers')
-      .select('*')
-      .eq('user_id', userId)
-      .single()
-    setTeacher(data ?? null)
+    try {
+      const { data } = await supabase
+        .from('teachers')
+        .select('*')
+        .eq('user_id', userId)
+        .single()
+      setTeacher(data ?? null)
+    } catch (err) {
+      console.error('[Auth] fetchTeacher failed', err)
+      setTeacher(null)
+    }
   }
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session)
-      setUser(session?.user ?? null)
-      if (session?.user) {
-        const isAdminUser = session.user.email === ADMIN_EMAIL
-        if (isAdminUser) setLoading(false)
-        else fetchTeacher(session.user.id).finally(() => setLoading(false))
-      } else {
-        setLoading(false)
+    let cancelled = false
+
+    const init = async () => {
+      try {
+        if (!isSupabaseConfigured) {
+          // Don't hang forever when env is missing
+          if (!cancelled) setLoading(false)
+          return
+        }
+
+        const { data: { session } } = await supabase.auth.getSession()
+        if (cancelled) return
+
+        setSession(session)
+        setUser(session?.user ?? null)
+
+        if (session?.user) {
+          const isAdminUser = session.user.email === ADMIN_EMAIL
+          if (isAdminUser) {
+            setLoading(false)
+          } else {
+            await fetchTeacher(session.user.id)
+            if (!cancelled) setLoading(false)
+          }
+        } else {
+          setLoading(false)
+        }
+      } catch (err) {
+        console.error('[Auth] getSession failed', err)
+        if (!cancelled) setLoading(false)
       }
-    })
+    }
+
+    init()
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session)
@@ -60,10 +88,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     })
 
-    return () => subscription.unsubscribe()
+    return () => {
+      cancelled = true
+      subscription.unsubscribe()
+    }
   }, [])
 
   const signInWithGoogle = async () => {
+    if (!isSupabaseConfigured) {
+      alert('Supabase غير مضبوط. ضع VITE_SUPABASE_URL و VITE_SUPABASE_ANON_KEY في ملف .env')
+      return
+    }
+
     // Respect Vite base path (e.g. /ekhtaberni/) so OAuth callback works on GitHub Pages / subpath deploys
     const base = (import.meta.env.BASE_URL || '/').replace(/\/$/, '')
     const redirectTo = `${window.location.origin}${base}/auth/callback`
@@ -75,7 +111,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   const signOut = async () => {
-    await supabase.auth.signOut()
+    try {
+      await supabase.auth.signOut()
+    } catch (err) {
+      console.error('[Auth] signOut failed', err)
+    }
     setTeacher(null)
   }
 
