@@ -3,7 +3,6 @@ import { Session, User } from '@supabase/supabase-js'
 import { supabase, isSupabaseConfigured } from '../lib/supabase'
 import { Teacher } from '../types'
 
-// Admin email - can be overridden with VITE_ADMIN_EMAIL (fallback kept for compatibility)
 export const ADMIN_EMAIL = (import.meta.env.VITE_ADMIN_EMAIL as string) || 'mrproject343@gmail.com'
 
 interface AuthContextType {
@@ -47,7 +46,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const init = async () => {
       try {
         if (!isSupabaseConfigured) {
-          // Don't hang forever when env is missing
           if (!cancelled) setLoading(false)
           return
         }
@@ -100,9 +98,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return
     }
 
-    // Respect Vite base path (e.g. /ekhtaberni/) so OAuth callback works on GitHub Pages / subpath deploys
-    const base = (import.meta.env.BASE_URL || '/').replace(/\/$/, '')
-    const redirectTo = `${window.location.origin}${base}/auth/callback`
+    const redirectTo = `${window.location.origin}/auth/callback`
 
     await supabase.auth.signInWithOAuth({
       provider: 'google',

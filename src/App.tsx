@@ -47,7 +47,6 @@ function AppRoutes() {
       <Route path="/teacher/dashboard" element={
         teacher?.status === 'active' ? <TeacherDashboard /> : <Navigate to="/teacher/login" />
       } />
-      {/* Admin route - only accessible by admin email */}
       <Route path="/admin" element={
         isAdmin ? <AdminDashboard /> : <Navigate to="/teacher/login" />
       } />
@@ -60,10 +59,9 @@ function AppRoutes() {
 }
 
 export default function App() {
-  // basename must match vite.config.ts `base`
   return (
     <ErrorBoundary>
-      <BrowserRouter basename="/ekhtaberni">
+      <BrowserRouter>
         <AuthProvider>
           <AppRoutes />
         </AuthProvider>
