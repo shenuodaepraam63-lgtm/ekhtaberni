@@ -4,8 +4,8 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
 
-  // Root base so the app works on Netlify / Vercel / local without /ekhtaberni prefix
-  base: '/',
+  // Required for GitHub Pages: https://USERNAME.github.io/ekhtaberni/
+  base: '/ekhtaberni/',
 
   server: {
     port: 3000,

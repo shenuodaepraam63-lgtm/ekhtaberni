@@ -98,7 +98,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return
     }
 
-    const redirectTo = `${window.location.origin}/auth/callback`
+    // Must match GitHub Pages base path
+    const redirectTo = `${window.location.origin}/ekhtaberni/auth/callback`
 
     await supabase.auth.signInWithOAuth({
       provider: 'google',
