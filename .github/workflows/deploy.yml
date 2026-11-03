@@ -17,6 +17,8 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    # Needed so the job can read Environment secrets (VITE_SUPABASE_*)
+    environment: github-pages
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -29,6 +31,18 @@ jobs:
 
       - name: Install dependencies
         run: npm install
+
+      - name: Check required secrets
+        run: |
+          if [ -z "$VITE_SUPABASE_URL" ] || [ -z "$VITE_SUPABASE_ANON_KEY" ]; then
+            echo "ERROR: VITE_SUPABASE_URL or VITE_SUPABASE_ANON_KEY is empty."
+            echo "Add them under Settings → Environments → github-pages → Environment secrets"
+            exit 1
+          fi
+          echo "Supabase env vars are present (values hidden)."
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
 
       - name: Build
         run: npm run build
