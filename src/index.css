@@ -10,30 +10,26 @@
 
 html {
   -webkit-text-size-adjust: 100%;
-  /* ✅ iPhone notch/safe area support */
+  /* iPhone notch / safe area */
   padding-top: max(0px, env(safe-area-inset-top));
   padding-bottom: max(0px, env(safe-area-inset-bottom));
   padding-left: max(0px, env(safe-area-inset-left));
   padding-right: max(0px, env(safe-area-inset-right));
+  scroll-behavior: smooth;
 }
 
 body {
   margin: 0;
+  min-height: 100%;
   background-color: #f8fafc;
-  overscroll-behavior: none;
-  /* ✅ منع bounce على iOS */
-  position: fixed;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
+  overscroll-behavior-y: none;
+  /* Normal document flow — no position:fixed so scroll works on laptop/desktop */
 }
 
 #root {
   width: 100%;
-  height: 100%;
-  overflow-y: auto;
+  min-height: 100%;
   overflow-x: hidden;
-  /* ✅ Smooth scrolling على iOS */
   -webkit-overflow-scrolling: touch;
 }
 
@@ -43,33 +39,36 @@ body {
   direction: rtl;
 }
 
-/* ✅ Better mobile scrolling */
+/* Better mobile scrolling */
 .overflow-y-auto {
   -webkit-overflow-scrolling: touch;
 }
 
-/* ✅ Prevent horizontal scroll on mobile */
-* {
+/* Only constrain media — not every element */
+img,
+video,
+svg {
   max-width: 100%;
+  height: auto;
 }
 
-/* ✅ Mobile button press feedback */
-button, a {
+/* Mobile button / link press feedback */
+button,
+a {
   -webkit-tap-highlight-color: transparent;
-  -webkit-user-select: none;
-  user-select: none;
 }
 
-/* ✅ Input fields على موبايل */
-input, textarea, select {
+/* Inputs: avoid iOS zoom on focus */
+input,
+textarea,
+select {
   -webkit-appearance: none;
   appearance: none;
   border-radius: 12px;
-  /* منع zoom على iOS عند التركيز */
   font-size: 16px;
 }
 
-/* ✅ Line clamp utility */
+/* Line clamp utilities */
 .line-clamp-2 {
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -84,60 +83,51 @@ input, textarea, select {
   overflow: hidden;
 }
 
-/* ✅ Scrollbar styling for dark panels */
-.dark-scroll::-webkit-scrollbar { width: 4px; }
-.dark-scroll::-webkit-scrollbar-track { background: transparent; }
-.dark-scroll::-webkit-scrollbar-thumb { background: #374151; border-radius: 4px; }
+/* Scrollbar for dark panels */
+.dark-scroll::-webkit-scrollbar {
+  width: 4px;
+}
+.dark-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.dark-scroll::-webkit-scrollbar-thumb {
+  background: #374151;
+  border-radius: 4px;
+}
 
-/* ✅ Safe area helpers */
+/* Safe area helpers */
 .pb-safe {
   padding-bottom: max(1rem, env(safe-area-inset-bottom));
 }
-
 .pt-safe {
   padding-top: max(1rem, env(safe-area-inset-top));
 }
-
 .pl-safe {
   padding-left: max(1rem, env(safe-area-inset-left));
 }
-
 .pr-safe {
   padding-right: max(1rem, env(safe-area-inset-right));
 }
 
-/* ✅ Responsive text sizes على موبايل */
-@media (max-width: 640px) {
-  body {
-    font-size: 14px;
-  }
-  
-  h1 { font-size: 1.5rem !important; }
-  h2 { font-size: 1.25rem !important; }
-  h3 { font-size: 1.1rem !important; }
-  
-  /* منع الخطوط الكبيرة جداً */
-  .text-4xl { font-size: 1.875rem !important; }
-  .text-3xl { font-size: 1.5rem !important; }
-  .text-2xl { font-size: 1.25rem !important; }
-}
-
-/* ✅ Loading spinner animation */
+/* Spinner */
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
-
 .animate-spin {
   animation: spin 1s linear infinite;
 }
 
-/* ✅ Fade animation */
+/* Fade */
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
-
 .animate-fade-in {
   animation: fadeIn 0.3s ease-in;
 }
-
