@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
+import { ErrorBoundary } from './components/ErrorBoundary'
 import LandingPage from './pages/LandingPage'
 import TeacherLogin from './pages/TeacherLogin'
 import TeacherOnboarding from './pages/TeacherOnboarding'
@@ -46,7 +47,6 @@ function AppRoutes() {
       <Route path="/teacher/dashboard" element={
         teacher?.status === 'active' ? <TeacherDashboard /> : <Navigate to="/teacher/login" />
       } />
-      {/* Admin route - only accessible by admin email */}
       <Route path="/admin" element={
         isAdmin ? <AdminDashboard /> : <Navigate to="/teacher/login" />
       } />
@@ -60,10 +60,12 @@ function AppRoutes() {
 
 export default function App() {
   return (
-    <BrowserRouter basename="/ekhtaberni">
-      <AuthProvider>
-        <AppRoutes />
-      </AuthProvider>
-    </BrowserRouter>
+    <ErrorBoundary>
+      <BrowserRouter basename="/ekhtaberni">
+        <AuthProvider>
+          <AppRoutes />
+        </AuthProvider>
+      </BrowserRouter>
+    </ErrorBoundary>
   )
 }

@@ -1,0 +1,15 @@
+name: Deploy Pages (disabled duplicate)
+
+# Disabled - use deploy.yml instead
+on:
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: 'This workflow is disabled'
+        required: false
+
+jobs:
+  skip:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Use the Deploy to GitHub Pages workflow (deploy.yml) instead"
