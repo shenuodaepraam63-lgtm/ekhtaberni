@@ -17,6 +17,7 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    environment: github-pages
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -30,12 +31,34 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Build
-        run: npm run build
+      - name: Resolve env and build
+        run: |
+          # Prefer secrets, fall back to vars (you mixed both)
+          export VITE_SUPABASE_URL="${SECRET_URL:-$VAR_URL}"
+          export VITE_SUPABASE_ANON_KEY="${SECRET_KEY:-$VAR_KEY}"
+          export VITE_ADMIN_EMAIL="${SECRET_ADMIN:-$VAR_ADMIN}"
+
+          if [ -z "$VITE_SUPABASE_URL" ] || [ -z "$VITE_SUPABASE_ANON_KEY" ]; then
+            echo "ERROR: missing Supabase config"
+            echo "SECRET_URL length: ${#SECRET_URL}"
+            echo "VAR_URL length: ${#VAR_URL}"
+            echo "SECRET_KEY length: ${#SECRET_KEY}"
+            echo "VAR_KEY length: ${#VAR_KEY}"
+            echo "Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY under:"
+            echo "Settings → Environments → github-pages → Environment secrets (preferred)"
+            exit 1
+          fi
+
+          echo "URL length: ${#VITE_SUPABASE_URL}"
+          echo "KEY length: ${#VITE_SUPABASE_ANON_KEY}"
+          npm run build
         env:
-          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
-          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
-          VITE_ADMIN_EMAIL: ${{ secrets.VITE_ADMIN_EMAIL }}
+          SECRET_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          SECRET_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+          SECRET_ADMIN: ${{ secrets.VITE_ADMIN_EMAIL }}
+          VAR_URL: ${{ vars.VITE_SUPABASE_URL }}
+          VAR_KEY: ${{ vars.VITE_SUPABASE_ANON_KEY }}
+          VAR_ADMIN: ${{ vars.VITE_ADMIN_EMAIL }}
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
