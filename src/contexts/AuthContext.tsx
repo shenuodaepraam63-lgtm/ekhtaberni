@@ -3,8 +3,8 @@ import { Session, User } from '@supabase/supabase-js'
 import { supabase } from '../lib/supabase'
 import { Teacher } from '../types'
 
-// Admin email - this user bypasses teacher flow and goes directly to admin dashboard
-export const ADMIN_EMAIL = 'mrproject343@gmail.com'
+// Admin email - can be overridden with VITE_ADMIN_EMAIL (fallback kept for compatibility)
+export const ADMIN_EMAIL = (import.meta.env.VITE_ADMIN_EMAIL as string) || 'mrproject343@gmail.com'
 
 interface AuthContextType {
   session: Session | null
@@ -64,9 +64,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   const signInWithGoogle = async () => {
+    // Respect Vite base path (e.g. /ekhtaberni/) so OAuth callback works on GitHub Pages / subpath deploys
+    const base = (import.meta.env.BASE_URL || '/').replace(/\/$/, '')
+    const redirectTo = `${window.location.origin}${base}/auth/callback`
+
     await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: `${window.location.origin}/auth/callback` },
+      options: { redirectTo },
     })
   }
 
